@@ -22,25 +22,48 @@ As this was so useful for us, we have decided to open source our solution as Ope
 * GraphicsMagick 1.3.19
 * nginx 1.6.0
 
+### Requirements installation on Fedora:
+
+```shell
+sudo dnf install GraphicsMagick-c++-devel boost-devel \
+  openssl-devellibffi-devel libffi-devel
+```
+
 ## Installation for testing/debug
 
 1. Clone openross.
+
 2. Setup a virtual environment (optional).
+
 3. Run `pip install -e .`
-4. Change directory into the inner `openross` directory.
-5. Add your AWS credentials and directory paths to `~/.openross.py`
-```python
-AWS_ACCESS_KEY_ID = "MYKEYID"
-AWS_SECRET_ACCESS_KEY = "MYSECRETKEY"
-IMAGES_STORE = 'MYBUCKET'
-CACHE_LOCATION = '/<path>/<to>/<cache>/'  # e.g. '/srv/http/cache/'
-WEB_CACHE_LOCATION = '/url/to/endpoint'  # e.g. '/'
-DEBUG = True
-```
-6. Run `twisted -n openross`.
-7. Configure nginx using the `nginx.conf-snippet` file for help.
-8. Start nginx.
-9. Navigate to `http://localhost/path/to/image/in/your/s3/bucket`.
+
+4. Run all tests:
+
+  ```shell
+  trial tests
+  ```
+
+5. Change directory into the inner `openross` directory.
+
+6. Add your AWS credentials and directory paths to `~/.openross.py`
+
+  ```python
+  AWS_ACCESS_KEY_ID = 'MYKEYID'
+  AWS_SECRET_ACCESS_KEY = 'MYSECRETKEY'
+  AWS_S3_ENDPOINT = 'https://s3.amazonaws.com'
+  IMAGES_STORE = 'MYBUCKET'
+  CACHE_LOCATION = '/<path>/<to>/<cache>/'  # e.g. '/srv/http/cache/'
+  WEB_CACHE_LOCATION = '/url/to/endpoint'  # e.g. '/'
+  DEBUG = True
+  ```
+
+7. Run `twistd -n openross`.
+
+8. Configure nginx using the `nginx.conf-snippet` file for help.
+
+9. Start nginx.
+
+10. Navigate to `http://localhost/path/to/image/in/your/s3/bucket`.
 
 ## Usage
 
@@ -81,6 +104,7 @@ If you have set a larger expirey time for your cache, then you will have to indi
 
 As the cache is in local storage it can fill up quite fast.
 There are many solutions to clearing it, the option that we went for was a cron job that runs every 5 minutes.
+
 ```bash
 find /path/to/cache -ignore_readdir_race -mindepth 3 -type f -name \"*jpeg\" -mmin +30 -delete >/dev/null 2>&1
 ```
@@ -91,9 +115,10 @@ This removes all images that have written more than 30 minutes ago.
 If you dont use Amazon S3 to store your images, but still want to use OpenRoss, fear not!
 
 Modify your `~/.openross.py' to turn off the S3 Downloader pipeline and set the internal cache location to your media director:
+
 ```python
-AWS_ACCESS_KEY_ID = "MYKEYID"
-AWS_SECRET_ACCESS_KEY = "MYSECRETKEY"
+AWS_ACCESS_KEY_ID = 'MYKEYID'
+AWS_SECRET_ACCESS_KEY = 'MYSECRETKEY'
 IMAGES_STORE = 'MYBUCKET'
 DEBUG = True         
 

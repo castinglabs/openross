@@ -24,6 +24,7 @@ IMAGES_STORE = ''
 # AWS creds - Ensure these are overwritten in your local settings file
 AWS_ACCESS_KEY_ID = None
 AWS_SECRET_ACCESS_KEY = None
+AWS_S3_ENDPOINT = 'https://s3.amazonaws.com'
 
 # Will essentially give the first deferred 600ms to finish, second 400ms, etc
 S3_TIMEOUT = 0.2
