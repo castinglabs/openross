@@ -1,15 +1,20 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
+import glob
+import logging
+import os
+
 from twisted.internet import defer, threads
 from twisted.python import log
-from utils import time_on_statsd, statsd_name
-import settings
-import glob
-import os
-import logging
+
+from openross import settings
+from openross.utils import time_on_statsd, statsd_name
 
 
 class CacheCheck(object):
-    """ Pipeline process which checks if an image already exists in the cache that can
-        be resized, rather than hitting S3 """
+    """ Pipeline process which checks if an image already exists in the cache
+    that can be resized, rather than hitting S3
+    """
 
     def __init__(self, engine):
         self.engine = engine
@@ -47,8 +52,11 @@ class CacheCheck(object):
 
         if settings.DEBUG:
             log.msg(
-                'Original file found in cache, skipping S3: %s' % (bigger_cache),
-                logLevel=logging.DEBUG)
+                'Original file found in cache, skipping S3: %s' % (
+                    bigger_cache
+                ),
+                logLevel=logging.DEBUG
+            )
 
         data = yield threads.deferToThread(self._read_image, bigger_cache)
         payload['original_image'] = data

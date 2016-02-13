@@ -1,5 +1,8 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 import pgmagick as pg
-import settings
+
+from openross import settings
 
 """ This Module is where image processing functions are defined.
     It will contain a mapping between mode and processing functions
@@ -26,8 +29,9 @@ def _resize(img, width, height):
           Performs a box resize on the original image
         Mode key: 'r'
     """
+    geometry = pg.Geometry(int(width), int(height))
 
-    img.scale('%sx%s' % (width, height))
+    img.scale(geometry)
 
     return img
 
@@ -36,13 +40,14 @@ def _resizecomp(img, width, height):
     """ Used to be called 'normal'
         This:
           First performs a box resize on the original image
-          Secondly, composites the image on to a white square of the required wxh
+          Secondly, composites the image on to a white square of the required
+          wxh
         Mode key: 'resizecomp'
     """
+    geometry = pg.Geometry(int(width), int(height))
+    img.scale(geometry)
 
-    img.scale('%sx%s' % (width, height))
-
-    backdrop = pg.Image(pg.Geometry(int(width), int(height)), 'white')
+    backdrop = pg.Image(geometry, pg.Color(str('white')))
     wdiff = (int(width) - img.size().width()) / 2
     hdiff = (int(height) - img.size().height()) / 2
     backdrop.composite(img, wdiff, hdiff, pg.CompositeOperator.AtopCompositeOp)
@@ -53,23 +58,27 @@ def _resizecomp(img, width, height):
 
 def _crop(img, width, height):
     """ This:
-          First performs a box resize on the original image, but so only the smallest
-            dimension is in the box. So if width was smaller, the image would be resized
-            to Wx?
-          Secondly, The image is cropped to the desired size, trimming the edges that are
-            outside of the box
+          First performs a box resize on the original image, but so only the
+          smallest dimension is in the box. So if width was smaller, the image
+          would be resized to Wx?
+          Secondly, The image is cropped to the desired size, trimming the
+          edges that are outside of the box
         Mode key: 'crop'
     """
 
     if img.size().width() < img.size().height():
-        img.scale('%sx999999' % (width))
+        img.scale(pg.Geometry(int(width), 999999))
     else:
-        img.scale('999999x%s' % (height))
+        img.scale(pg.Geometry(999999, int(height)))
 
-    backdrop = pg.Image(pg.Geometry(int(width), int(height)), 'white')
+    backdrop = pg.Image(
+        pg.Geometry(int(width), int(height)), pg.Color(str('white'))
+    )
     wdiff = (img.size().width() - int(width)) / 2
     hdiff = (img.size().height() - int(height)) / 2
-    backdrop.composite(img, -wdiff, -hdiff, pg.CompositeOperator.CopyCompositeOp)
+    backdrop.composite(
+        img, -wdiff, -hdiff, pg.CompositeOperator.CopyCompositeOp
+    )
     img = backdrop
 
     return img
@@ -78,19 +87,20 @@ def _crop(img, width, height):
 def _trim_resize(img, width, height):
     """ This:
           First performs a trim on the image with no color fuzz
-          Secondly, performs a box resize on the original image only if the image is larger
-            than the target size
-          Thirdly, composites the image on to a white square of the required wxh
+          Secondly, performs a box resize on the original image only if the
+          image is larger than the target size
+          Thirdly, composites the image on to a white square of the required
+          wxh
         Mode key: 'trimresize'
     """
-
+    geometry = pg.Geometry(int(width), int(height))
     img.trim()
 
     w, h = img.size().width(), img.size().height()
     if w > int(width) or h > int(height):
-        img.scale('%sx%s' % (width, height))
+        img.scale(geometry)
 
-    backdrop = pg.Image(pg.Geometry(int(width), int(height)), 'white')
+    backdrop = pg.Image(geometry, pg.Color(str('white')))
     wdiff = (int(width) - img.size().width()) / 2
     hdiff = (int(height) - img.size().height()) / 2
     backdrop.composite(img, wdiff, hdiff, pg.CompositeOperator.AtopCompositeOp)

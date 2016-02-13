@@ -1,8 +1,13 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 from twisted.internet import defer
-import settings
+
+from openross import settings
 
 
-def _healthcheck_process_image(engine, image_path, width, height, mode, **kwargs):
+def _healthcheck_process_image(
+    engine, image_path, width, height, mode, **kwargs
+):
     """ Build a payload for a healthcheck """
     payload = {}
     payload['image_path'] = image_path
@@ -17,8 +22,8 @@ def _healthcheck_process_image(engine, image_path, width, height, mode, **kwargs
 
 def healthcheck(request, engine):
     """ Handles the health check process.
-        This puts a predefined image through the pipeline for each mode, ensures there
-        is no error, and ensures the sizes are expected
+        This puts a predefined image through the pipeline for each mode,
+        ensures there no error, and ensures the sizes are expected
     """
 
     def on_health_finish(data, request):
@@ -40,7 +45,11 @@ def healthcheck(request, engine):
     modes = settings.ALLOWED_MODES
 
     dfd = defer.DeferredList(
-        [_healthcheck_process_image(engine, image_path, width, height, m, **request.args)
-            for m in modes]
+        [
+            _healthcheck_process_image(
+                engine, image_path, width, height, m, **request.args
+            )
+            for m in modes
+        ]
     )
     dfd.addBoth(on_health_finish, request)

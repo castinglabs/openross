@@ -1,13 +1,17 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
+from datetime import datetime
+import logging
+
+import boto
 from twisted.internet import defer, threads, task, reactor
 from twisted.python import log
-from datetime import datetime
-from errors import NoDataInS3Error
-from utils import time_on_statsd, statsd_name
 from txaws.service import AWSServiceRegion
 from txaws.regions import S3_EU_WEST
-import boto
-import settings
-import logging
+
+from openross.errors import NoDataInS3Error
+from openross.utils import time_on_statsd, statsd_name
+from openross import settings
 
 
 class S3Downloader(object):
@@ -45,20 +49,23 @@ class S3Downloader(object):
     @time_on_statsd(statsd_name(), 's3_downloader')
     def process_image(self, payload,  **kwargs):
         """ Gets image data from S3.
-            This attempts to download from s3 settings.ATTEMPTS times and timeouts after
-            settings.S3_TIMEOUT """
+            This attempts to download from s3 settings.ATTEMPTS times and
+            timeouts after settings.S3_TIMEOUT
+        """
 
         def _create_deferred(timeout=0):
             """ Creates a deferred which will run after a given delay """
             if settings.USE_BOTO:
                 dfd = task.deferLater(
                     reactor, timeout,
-                    threads.deferToThread, self._get_data_from_s3, payload['image_path']
+                    threads.deferToThread, self._get_data_from_s3,
+                    payload['image_path']
                 )
                 return dfd
             else:
                 dfd = task.deferLater(
-                    reactor, timeout, self._get_data_from_s3_tx, payload['image_path']
+                    reactor, timeout, self._get_data_from_s3_tx,
+                    payload['image_path']
                 )
                 return dfd
 
@@ -87,22 +94,28 @@ class S3Downloader(object):
 
         if settings.DEBUG:
             log.msg(
-                "[%s] Starting S3 Download" % datetime.now().isoformat(), logLevel=logging.DEBUG
+                "[%s] Starting S3 Download" % datetime.now().isoformat(),
+                logLevel=logging.DEBUG
             )
 
-        # Make a deferred list of download attempts that have their predefined starting
-        # times baked into the deferred. Return when any deferred has a successful result
-        # Keep a list of the original deferred as we cannot access them once in DeferredList
+        # Make a deferred list of download attempts that have their predefined
+        # starting times baked into the deferred. Return when any deferred has
+        # a successful result.
+        # Keep a list of the original deferred as we cannot access them once in
+        # DeferredList.
         dfds_list = []
         for attempt in range(0, settings.S3_ATTEMPTS):
-            dfds_list.append(_create_deferred(timeout=attempt*settings.S3_TIMEOUT))
+            dfds_list.append(_create_deferred(
+                timeout=attempt*settings.S3_TIMEOUT
+            ))
             dfds_list[-1].addErrback(_surpress_cancel_error)
         dfds = defer.DeferredList(dfds_list, fireOnOneCallback=True)
         dfds.addCallback(_s3callback)
 
         # Auto cancel requests which don't fire after their max timeout
         reactor.callLater(
-            settings.S3_ATTEMPTS*settings.S3_TIMEOUT, _timeout_and_fail, dfds_list
+            settings.S3_ATTEMPTS*settings.S3_TIMEOUT, _timeout_and_fail,
+            dfds_list
         )
 
         return dfds

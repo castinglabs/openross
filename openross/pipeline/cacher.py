@@ -1,15 +1,20 @@
-from twisted.internet import defer
-from twisted.internet import fdesc
-from twisted.python import log
+from __future__ import absolute_import, print_function, unicode_literals
+
 from datetime import datetime
-from utils import time_on_statsd, statsd_name
-import settings
 import os
 import logging
 
+from twisted.internet import defer, fdesc
+from twisted.python import log
+
+from openross import settings
+from openross.utils import time_on_statsd, statsd_name
+
 
 class Cacher(object):
-    """ Pipeline process which caches original and resized image into local cache """
+    """ Pipeline process which caches original and resized image into local
+    cache
+    """
 
     def __init__(self, engine):
         self.engine = engine
@@ -60,7 +65,8 @@ class Cacher(object):
         fd.close()
 
         if 'skip_resize' not in payload.keys():
-            # If image to be served has beenr esized, also cache full size image
+            # If image to be served has beenr esized, also cache full size
+            # image
             file_cache = os.path.join(filecache_loc, original_filename)
             fd = open(file_cache, 'w')
             fdesc.setNonBlocking(fd.fileno())
@@ -69,7 +75,9 @@ class Cacher(object):
 
         if settings.DEBUG:
             log.msg(
-                "[%s] Cached image location: %s" % (datetime.now().isoformat(), file_cache),
+                "[%s] Cached image location: %s" % (
+                    datetime.now().isoformat(), file_cache
+                ),
                 logLevel=logging.DEBUG
             )
 

@@ -1,12 +1,15 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
+
 DEBUG = False
 USE_BOTO = False
 
-IMAGE_PROCESSOR = 'pipeline.ImagePipelineManager'
+IMAGE_PROCESSOR = 'openross.pipeline.ImagePipelineManager'
 IMAGE_PIPELINES = [
-    'pipeline.cache_check.CacheCheck',
-    'pipeline.s3_downloader.S3Downloader',
-    'pipeline.resizer.Resizer',
-    'pipeline.cacher.Cacher',
+    'openross.pipeline.cache_check.CacheCheck',
+    'openross.pipeline.s3_downloader.S3Downloader',
+    'openross.pipeline.resizer.Resizer',
+    'openross.pipeline.cacher.Cacher',
 ]
 
 THREAD_POOL_SIZE = 8
@@ -74,14 +77,16 @@ HEALTH_EXPECTED_SIZE = {
 # Read settings from ~/.openross.py for private settings such as KEYS
 import os.path
 import sys
+
 CONFIG_FILE = os.path.abspath(os.path.expanduser("~/.openross.py"))
+
 if os.path.exists(CONFIG_FILE):
     import imp
     mod = imp.new_module('tmp_config')
     try:
         execfile(CONFIG_FILE, mod.__dict__)
         sys.modules[mod.__name__] = mod
-        from tmp_config import *
+        from tmp_config import *  # noqa
     except:
         sys.stderr.write("Couldn't load configuration file\n")
         import traceback

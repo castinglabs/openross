@@ -1,15 +1,21 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
+from datetime import datetime
+import logging
+
+import pgmagick as pg
 from twisted.internet import defer, threads
 from twisted.python import log
-from datetime import datetime
-from utils import time_on_statsd, statsd_name
-from image_modes import process_image_with_mode
-import pgmagick as pg
-import settings
-import logging
+
+from openross import settings
+from openross.utils import time_on_statsd, statsd_name
+from openross.image_modes import process_image_with_mode
 
 
 class Resizer(object):
-    """ Pipeline process which takes an image and resizes using a given image mode """
+    """ Pipeline process which takes an image and resizes using a given image
+    mode
+    """
 
     def __init__(self, engine):
         self.engine = engine
@@ -29,7 +35,7 @@ class Resizer(object):
         if settings.IMAGE_QUALITY is not None:  # May be handled by custom mode
             img.quality(settings.IMAGE_QUALITY)
 
-        img.write(blob_out, 'JPEG')
+        img.write(blob_out, str('JPEG'))
         return blob_out.data, img.size().width(), img.size().height()
 
     @time_on_statsd(statsd_name(), 'resizer')
@@ -49,7 +55,9 @@ class Resizer(object):
 
         if settings.DEBUG:
             log.msg(
-                "[%s] Resized Image Size %s" % (datetime.now().isoformat(), len(data)),
+                "[%s] Resized Image Size %s" % (
+                    datetime.now().isoformat(), len(data)
+                ),
                 logLevel=logging.DEBUG
             )
         payload['image'] = data

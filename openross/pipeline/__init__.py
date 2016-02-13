@@ -1,4 +1,6 @@
-from middleware import MiddlewareManager
+from __future__ import absolute_import, print_function, unicode_literals
+
+from openross.middleware import MiddlewareManager
 
 
 class ImagePipelineManager(MiddlewareManager):
@@ -17,5 +19,7 @@ class ImagePipelineManager(MiddlewareManager):
             self.methods['process_image'].append(pipe.process_image)
 
     def process_image(self, payload, **kwargs):
-        """Process image. kwargs should always have an image, width, and height"""
+        """ Process image. kwargs should always have an image, width, and
+        height
+        """
         return self._process_chain('process_image', payload, **kwargs)

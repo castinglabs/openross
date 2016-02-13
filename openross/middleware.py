@@ -1,7 +1,11 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 from collections import defaultdict
+
 from twisted.internet import defer
 from twisted.python import log
-import utils
+
+from openross import utils
 
 
 def process_chain(callbacks, input, *a, **kw):

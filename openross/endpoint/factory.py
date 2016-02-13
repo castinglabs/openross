@@ -1,5 +1,8 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 from twisted.web import server
-from endpoint import BobRossEndpoint
+
+from openross.endpoint import BobRossEndpoint
 
 
 def get_factory():

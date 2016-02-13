@@ -1,11 +1,12 @@
-import engine
+from __future__ import absolute_import, print_function, unicode_literals
+
+import logging
+
 from twisted.python import log
 from twisted.web import resource, server
-from endpoint.healthcheck import healthcheck
-from errors import NoDataInS3Error
-import settings
-import logging
-import utils
+
+from openross import engine, settings, utils, errors
+from openross.endpoint.healthcheck import healthcheck
 
 
 class BobRossEndpoint(resource.Resource):
@@ -36,7 +37,8 @@ class BobRossEndpoint(resource.Resource):
     def _check_allowed_size(self, width, height, mode):
         """ Check if requested size is in settings """
 
-        if int(width) <= settings.MAX_SIZE[0] and int(height) <= settings.MAX_SIZE[1]:
+        if int(width) <= settings.MAX_SIZE[0] and \
+                int(height) <= settings.MAX_SIZE[1]:
             if settings.USE_WHITELIST:
                 if width in settings.IMAGE_WHITELIST.keys():
                     if height in settings.IMAGE_WHITELIST[width]:
@@ -52,7 +54,9 @@ class BobRossEndpoint(resource.Resource):
         """ Handle GET request to server """
 
         def on_finish(file_path, request):
-            """ When image has been placed in cache, tell nginx where to serve from """
+            """ When image has been placed in cache, tell nginx where to serve
+            from
+            """
 
             if settings.DEBUG:
                 log.msg("Header Info: %s" % file_path, logLevel=logging.DEBUG)
@@ -67,7 +71,7 @@ class BobRossEndpoint(resource.Resource):
             # Reraise exception to send to Sentry
             try:
                 data.raiseException()
-            except NoDataInS3Error:
+            except errors.NoDataInS3Error:
                 utils.capture_warning(
                     'No Data in S3 Key',
                     extra={
@@ -77,7 +81,10 @@ class BobRossEndpoint(resource.Resource):
             except:
                 utils.capture_exception(
                     extra={
-                        'key': image_path, 'width': width, 'height': height, 'mode': mode
+                        'key': image_path,
+                        'width': width,
+                        'height': height,
+                        'mode': mode
                     }
                 )
             request.setResponseCode(403)
@@ -101,15 +108,18 @@ class BobRossEndpoint(resource.Resource):
                 image_path = request.path
 
         # Check for valid size
-        if width and height and mode and not self._check_allowed_size(width, height, mode):
+        if width and height and mode and \
+                not self._check_allowed_size(width, height, mode):
             if settings.DEBUG:
                 log.msg(
-                    "Size isn't white listed: (%s, %s)" % (width, height), logLevel=logging.DEBUG
+                    "Size isn't white listed: (%s, %s)" % (width, height),
+                    logLevel=logging.DEBUG
                 )
             request.setResponseCode(403)
             return ''
 
-        # If size is not defined, skip resizing and fill in payload magic numbers
+        # If size is not defined, skip resizing and fill in payload magic
+        # numbers
         if not width and not height and not mode:
             width = '-1'
             height = '-1'
@@ -119,8 +129,8 @@ class BobRossEndpoint(resource.Resource):
         if image_path[0] == '/':
             image_path = image_path[1:]
 
-        # If request if for /health, run a sanity test with known input and test against
-        # expected output
+        # If request if for /health, run a sanity test with known input and
+        # test against expected output
         if request.path == settings.HEALTH_CHECK_PATH:
             healthcheck(request, BobRossEndpoint.engine)
             return server.NOT_DONE_YET
@@ -130,7 +140,9 @@ class BobRossEndpoint(resource.Resource):
             request.setResponseCode(403)
             return ''
 
-        d = self._process_image(image_path, width, height, mode, **request.args)
+        d = self._process_image(
+            image_path, width, height, mode, **request.args
+        )
         d.addCallback(on_finish, request)
         d.addErrback(on_error)
         return server.NOT_DONE_YET

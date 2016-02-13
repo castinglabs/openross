@@ -1,9 +1,13 @@
-import settings
-import sys
-import socket
+from __future__ import absolute_import, print_function, unicode_literals
+
 import logging
+import socket
+import sys
+
 import statsd
 from twisted.internet import defer
+
+from openross import settings
 
 
 def load_object(path):
@@ -17,7 +21,7 @@ def load_object(path):
 
     module, name = path[:dot], path[dot + 1:]
     try:
-        mod = __import__(module, {}, {}, [''])
+        mod = __import__(module, fromlist=[str('')])
     except ImportError, e:
         raise ImportError("Error loading object '%s' : %s" % (path, e))
 
@@ -25,7 +29,10 @@ def load_object(path):
         obj = getattr(mod, name)
     except AttributeError:
         raise NameError(
-            "Module '%s' doesn't define any object named '%s'" % (module, name))
+            "Module '%s' doesn't define any object named '%s'" % (
+                module, name
+            )
+        )
 
     return obj
 
@@ -59,8 +66,8 @@ statsd_prefix = ''
 
 
 def statsd_name():
-    """ Determine a prefix to be applied to statsd name so that multiple instances on a
-        single machine can be differentiated by statsd
+    """ Determine a prefix to be applied to statsd name so that multiple
+    instances on a single machine can be differentiated by statsd
     """
     global statsd_prefix
     if not statsd_prefix:
@@ -69,11 +76,14 @@ def statsd_name():
             statsd_prefix = args[args.index('-p')+1]
         else:
             statsd_prefix = '0'
-    return '%s.%s%s' % (settings.STATSD_NAME, socket.gethostname(), statsd_prefix)
+    return '%s.%s%s' % (
+        settings.STATSD_NAME, socket.gethostname(), statsd_prefix
+    )
 
 
 def _generate_wrapped_deferred_decorator(contextmanager):
-    """ This will generate a decorator that will wrap a deffered with a context manager.
+    """ This will generate a decorator that will wrap a deffered with a context
+    manager.
         For example:
 
         class ToyContext:

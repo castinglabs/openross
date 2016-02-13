@@ -1,10 +1,13 @@
-from twisted.python.failure import Failure
-from twisted.python import log
-from twisted.internet import defer
-import utils
-import settings
+from __future__ import absolute_import, print_function, unicode_literals
+
 import logging
+
 import statsd
+from twisted.internet import defer
+from twisted.python import log
+from twisted.python.failure import Failure
+
+from openross import utils, settings
 
 
 class BobRossEngine(object):
@@ -25,7 +28,8 @@ class BobRossEngine(object):
         return dfd
 
     def health_check_image(self, payload, **kwargs):
-        """ Health check needs a different succeed/fail check than the normal pipeline
+        """ Health check needs a different succeed/fail check than the normal
+        pipeline
         """
 
         def _healthcheck_finished(output, payload, **kwargs):
@@ -49,7 +53,9 @@ class BobRossEngine(object):
         if isinstance(output, Failure):
             if settings.DEBUG:
                 log.err(
-                    'Error Processing %s' % payload['image_path'], logLevel=logging.ERROR)
+                    'Error Processing %s' % payload['image_path'],
+                    logLevel=logging.ERROR
+                )
             return defer.fail(output)
         else:
             if settings.DEBUG:
