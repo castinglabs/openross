@@ -16,7 +16,7 @@ RUN apt-get update \
 RUN pip install -U \
 		pip \
 		setuptools \
-	  https://github.com/castinglabs/openross/releases/download/v0.1.0-alpha/openross-0.1.0-py2-none-any.whl
+	  https://github.com/castinglabs/openross/releases/download/v0.1.0/openross-0.1.0-py2-none-any.whl
 
 RUN mkdir -p /srv/http/cache \
 	&& chown -R nginx /srv/http/cache
