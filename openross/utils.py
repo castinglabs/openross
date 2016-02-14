@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import
 
 import logging
 import socket
@@ -21,7 +21,7 @@ def load_object(path):
 
     module, name = path[:dot], path[dot + 1:]
     try:
-        mod = __import__(module, fromlist=[str('')])
+        mod = __import__(module, fromlist=[''])
     except ImportError, e:
         raise ImportError("Error loading object '%s' : %s" % (path, e))
 

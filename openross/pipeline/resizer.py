@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import
 
 from datetime import datetime
 import logging
@@ -35,7 +35,7 @@ class Resizer(object):
         if settings.IMAGE_QUALITY is not None:  # May be handled by custom mode
             img.quality(settings.IMAGE_QUALITY)
 
-        img.write(blob_out, str('JPEG'))
+        img.write(blob_out, 'JPEG')
         return blob_out.data, img.size().width(), img.size().height()
 
     @time_on_statsd(statsd_name(), 'resizer')

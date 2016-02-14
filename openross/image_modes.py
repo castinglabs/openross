@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import
 
 import pgmagick as pg
 
@@ -47,7 +47,7 @@ def _resizecomp(img, width, height):
     geometry = pg.Geometry(int(width), int(height))
     img.scale(geometry)
 
-    backdrop = pg.Image(geometry, pg.Color(str('white')))
+    backdrop = pg.Image(geometry, pg.Color('white'))
     wdiff = (int(width) - img.size().width()) / 2
     hdiff = (int(height) - img.size().height()) / 2
     backdrop.composite(img, wdiff, hdiff, pg.CompositeOperator.AtopCompositeOp)
@@ -72,7 +72,7 @@ def _crop(img, width, height):
         img.scale(pg.Geometry(999999, int(height)))
 
     backdrop = pg.Image(
-        pg.Geometry(int(width), int(height)), pg.Color(str('white'))
+        pg.Geometry(int(width), int(height)), pg.Color('white')
     )
     wdiff = (img.size().width() - int(width)) / 2
     hdiff = (img.size().height() - int(height)) / 2
@@ -100,7 +100,7 @@ def _trim_resize(img, width, height):
     if w > int(width) or h > int(height):
         img.scale(geometry)
 
-    backdrop = pg.Image(geometry, pg.Color(str('white')))
+    backdrop = pg.Image(geometry, pg.Color('white'))
     wdiff = (int(width) - img.size().width()) / 2
     hdiff = (int(height) - img.size().height()) / 2
     backdrop.composite(img, wdiff, hdiff, pg.CompositeOperator.AtopCompositeOp)
